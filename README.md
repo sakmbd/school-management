@@ -72,12 +72,6 @@ npm start
 
 ---
 
-### GET `/api/students/profile/:userId`
-
-Returns student's profile by their user ID.
-
----
-
 ## ✅ Technologies
 
 - **Node.js** + **Express**
