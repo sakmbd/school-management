@@ -1,0 +1,9 @@
+# Add this to prevent accidental pushes
+.env
+node_modules/
+logs/
+*.log
+.idea/
+.vscode/
+dist/
+coverage/
