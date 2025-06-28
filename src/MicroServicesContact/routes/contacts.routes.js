@@ -6,7 +6,12 @@ import contactValidation from '../validations/contact.validation.js';
 
 const router = express.Router();
 
-router.get('/contact', auth, userController.getContacts);
+router.get(
+  '/contact',
+  auth,
+  validate(contactValidation.query),
+  userController.getContacts,
+);
 router.post(
   '/contact',
   auth,

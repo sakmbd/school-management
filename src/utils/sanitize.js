@@ -1,31 +1,21 @@
 // src/utils/sanitize.js
 export const mongoSanitize = (data) => {
-  // Handle null/undefined
   if (data === null || data === undefined) return data;
-
-  // Handle non-object types (strings, numbers, booleans)
   if (typeof data !== 'object') return data;
-
-  // Handle Date, Buffer, and other special objects
   if (data instanceof Date || data instanceof Buffer) return data;
 
-  // Process arrays
   if (Array.isArray(data)) {
-    return data.map(item => mongoSanitize(item));
+    return data.map((item) => mongoSanitize(item));
   }
 
-  // Process regular objects
   const sanitized = {};
   for (const key of Object.keys(data)) {
-    // Skip prototype properties
-    if (!data.hasOwnProperty(key)) continue;
+    if (!Object.prototype.hasOwnProperty.call(data, key)) continue;
 
-    // Remove MongoDB operators and dangerous keys
     if (key.startsWith('$') || key.includes('.')) {
       continue;
     }
 
-    // Recursively sanitize nested values
     sanitized[key] = mongoSanitize(data[key]);
   }
   return sanitized;

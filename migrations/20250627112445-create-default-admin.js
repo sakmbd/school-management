@@ -7,24 +7,24 @@ const saltRounds = 12;
  * @returns {Promise<void>}
  */
 export const up = async (db, client) => {
-    const hashedPassword = await bcrypt.hash('admin@786', saltRounds);
-    
-    await db.collection('users').insertOne({
-        firstName: 'Shakeel',
-        lastName: 'Ahamed',
-        email: 'sakmbd@gmail.com',
-        password: hashedPassword,
-        role: 'Admin',
-        address: {
-            street: 'Aslampur',
-            city: 'Sambhal',
-            state: 'Uttar Pradesh',
-            postalCode: '244303',
-            country: 'India'
-        },
-        createdAt: new Date(),
-        updatedAt: new Date()
-    });
+  const hashedPassword = await bcrypt.hash('admin@786', saltRounds);
+
+  await db.collection('users').insertOne({
+    firstName: 'Test',
+    lastName: 'Admin',
+    email: 'example@example.com',
+    password: hashedPassword,
+    role: 'Admin',
+    address: {
+      street: 'Test',
+      city: 'Test',
+      state: 'Test',
+      postalCode: '123456',
+      country: 'India',
+    },
+    createdAt: new Date(),
+    updatedAt: new Date(),
+  });
 };
 
 /**
@@ -33,5 +33,5 @@ export const up = async (db, client) => {
  * @returns {Promise<void>}
  */
 export const down = async (db, client) => {
-    await db.collection('users').deleteOne({ email: 'sakmbd@gmail.com' });
+  await db.collection('users').deleteOne({ email: 'example@example.com' });
 };

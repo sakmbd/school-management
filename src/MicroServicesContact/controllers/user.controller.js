@@ -5,8 +5,46 @@ import ApiError from '../../utils/ApiError.js';
 // GET /contacts - List all contacts
 const getContacts = async (req, res, next) => {
   try {
-    const contacts = await Contact.find();
-    res.status(httpStatus.OK).json(contacts);
+    const {
+      page = 1,
+      limit = 10,
+      search = '',
+      type, // optional: home or work
+    } = req.query;
+
+    const filters = [];
+
+    // Free text search across name, phone, address
+    if (search) {
+      filters.push({
+        $or: [
+          { name: { $regex: search, $options: 'i' } },
+          { phone: { $regex: search, $options: 'i' } },
+          { address: { $regex: search, $options: 'i' } },
+        ],
+      });
+    }
+
+    // Filter by contact type if provided
+    if (type) {
+      filters.push({ type });
+    }
+
+    const query = filters.length > 0 ? { $and: filters } : {};
+
+    const contacts = await Contact.find(query)
+      .skip((page - 1) * limit)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 });
+
+    const total = await Contact.countDocuments(query);
+
+    res.status(httpStatus.OK).json({
+      total,
+      page: parseInt(page),
+      limit: parseInt(limit),
+      data: contacts,
+    });
   } catch (error) {
     next(
       new ApiError(
@@ -22,12 +60,13 @@ const saveContacts = async (req, res, next) => {
   try {
     const { name, phone, address, type } = req.body;
 
-    // Optional validation
-    if (!name || !phone || !type) {
+    // Check if phone number already exists
+    const existing = await Contact.findOne({ phone });
+    if (existing) {
       return next(
         new ApiError(
-          httpStatus.BAD_REQUEST,
-          'Name, phone, and type are required.',
+          httpStatus.CONFLICT,
+          'Contact with this phone number already exists.',
         ),
       );
     }
@@ -57,6 +96,17 @@ const updateContacts = async (req, res, next) => {
       { name, phone, address, type },
       { new: true, runValidators: true },
     );
+
+    // Check if another contact already uses this phone
+    const duplicate = await Contact.findOne({ phone, _id: { $ne: id } });
+    if (duplicate) {
+      return next(
+        new ApiError(
+          httpStatus.CONFLICT,
+          'Another contact with this phone number already exists.',
+        ),
+      );
+    }
 
     if (!updatedContact) {
       return next(new ApiError(httpStatus.NOT_FOUND, 'Contact not found'));
