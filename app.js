@@ -16,7 +16,22 @@ const app = express();
 
 // Security
 app.use(helmet());
-app.use(cors());
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps, curl, file:// etc.)
+    if (!origin) return callback(null, true);
+
+    const allowedOrigins = ['http://localhost:3000'];
+    if (allowedOrigins.includes(origin)) {
+      return callback(null, true);
+    } else {
+      return callback(new Error('CORS not allowed from this origin'), false);
+    }
+  },
+  credentials: true, // optional, only if you're using cookies or authorization headers
+}));
+
 app.use(securityMiddleware);
 app.use(rateLimit({ windowMs: 15 * 60 * 1000, max: 1000 }));
 
