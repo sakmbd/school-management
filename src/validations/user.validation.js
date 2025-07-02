@@ -7,7 +7,6 @@ export const userValidationSchema = Joi.object({
   password: Joi.string().min(6).required(),
   role: Joi.string()
     .valid(
-      'Admin',
       'Principal',
       'Vice Principal',
       'Teachers',
